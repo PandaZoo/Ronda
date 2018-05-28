@@ -1,4 +1,4 @@
-package cn.panda.ronda.spring.parser;
+package cn.panda.ronda.spring.schema;
 
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
