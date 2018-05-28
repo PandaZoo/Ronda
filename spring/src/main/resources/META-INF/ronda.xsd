@@ -196,7 +196,7 @@
         </xsd:complexContent>
     </xsd:complexType>
 
-    <xsd:complexType name="consumerType">
+    <!--<xsd:complexType name="consumerType">
         <xsd:complexContent>
             <xsd:extension base="abstractReferenceType">
                 <xsd:sequence minOccurs="0" maxOccurs="unbounded">
@@ -216,7 +216,7 @@
                 <xsd:anyAttribute namespace="##other" processContents="lax"/>
             </xsd:extension>
         </xsd:complexContent>
-    </xsd:complexType>
+    </xsd:complexType>-->
 
 
     <xsd:complexType name="referenceType">
@@ -244,11 +244,6 @@
                 <xsd:attribute name="client" type="xsd:string" use="optional">
                     <xsd:annotation>
                         <xsd:documentation><![CDATA[ Protocol transport client type. ]]></xsd:documentation>
-                    </xsd:annotation>
-                </xsd:attribute>
-                <xsd:attribute name="consumer" type="xsd:string" use="optional">
-                    <xsd:annotation>
-                        <xsd:documentation><![CDATA[ Deprecated. Replace to reference-default. ]]></xsd:documentation>
                     </xsd:annotation>
                 </xsd:attribute>
                 <xsd:attribute name="protocol" type="xsd:string" use="optional">
@@ -308,7 +303,7 @@
        <xsd:anyAttribute namespace="##other" processContents="lax"/>
     </xsd:complexType>
 
-    <xsd:complexType name="providerType">
+    <!--<xsd:complexType name="providerType">
         <xsd:complexContent>
             <xsd:extension base="abstractServiceType">
                 <xsd:choice minOccurs="0" maxOccurs="unbounded">
@@ -343,7 +338,7 @@
                 <xsd:anyAttribute namespace="##other" processContents="lax"/>
             </xsd:extension>
         </xsd:complexContent>
-    </xsd:complexType>
+    </xsd:complexType>-->
 
     <xsd:complexType name="serviceType">
         <xsd:complexContent>
@@ -373,11 +368,6 @@
                 <xsd:attribute name="class" type="xsd:string" use="optional">
                     <xsd:annotation>
                         <xsd:documentation><![CDATA[ The service implementation class name. ]]></xsd:documentation>
-                    </xsd:annotation>
-                </xsd:attribute>
-                <xsd:attribute name="provider" type="xsd:string" use="optional">
-                    <xsd:annotation>
-                        <xsd:documentation><![CDATA[ Deprecated. Replace to protocol. ]]></xsd:documentation>
                     </xsd:annotation>
                 </xsd:attribute>
                 <xsd:anyAttribute namespace="##other" processContents="lax"/>
@@ -429,7 +419,7 @@
     </xsd:element>
 
 
-    <xsd:element name="provider" type="providerType">
+    <!--<xsd:element name="provider" type="providerType">
         <xsd:annotation>
             <xsd:documentation><![CDATA[ Export service default config ]]></xsd:documentation>
         </xsd:annotation>
@@ -439,7 +429,7 @@
         <xsd:annotation>
             <xsd:documentation><![CDATA[ Service reference default config ]]></xsd:documentation>
         </xsd:annotation>
-    </xsd:element>
+    </xsd:element>-->
 
     <xsd:element name="protocol" type="protocolType">
         <xsd:annotation>
@@ -447,13 +437,13 @@
         </xsd:annotation>
     </xsd:element>
 
-    <xsd:element name="service" type="serviceType">
+    <xsd:element name="provider" type="serviceType">
         <xsd:annotation>
             <xsd:documentation><![CDATA[ Export service config ]]></xsd:documentation>
         </xsd:annotation>
     </xsd:element>
 
-    <xsd:element name="reference" type="referenceType">
+    <xsd:element name="consumer" type="referenceType">
         <xsd:annotation>
             <xsd:documentation><![CDATA[ Reference service config ]]></xsd:documentation>
         </xsd:annotation>
