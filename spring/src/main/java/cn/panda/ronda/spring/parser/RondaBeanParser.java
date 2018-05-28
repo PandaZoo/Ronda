@@ -34,6 +34,7 @@ public class RondaBeanParser implements BeanDefinitionParser {
             String generatedBeanName = element.getAttribute("name");
 
         }
+        
 
         return null;
     }
