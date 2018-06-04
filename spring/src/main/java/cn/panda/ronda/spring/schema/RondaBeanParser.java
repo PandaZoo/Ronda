@@ -1,11 +1,21 @@
 package cn.panda.ronda.spring.schema;
 
+import cn.panda.ronda.base.remoting.codec.CodecTypeEnum;
+import cn.panda.ronda.base.remoting.exception.ExceptionCode;
+import cn.panda.ronda.base.remoting.exception.RondaException;
+import cn.panda.ronda.base.remoting.helper.EnumFunction;
+import cn.panda.ronda.spring.config.ProviderBean;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.w3c.dom.Element;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author asdsut
@@ -49,12 +59,38 @@ public class RondaBeanParser implements BeanDefinitionParser {
             beanDefinition.getPropertyValues().add("id", id);
         }
 
+        if (ProviderBean.class.isAssignableFrom(beanClass)) {
+            parseProviderBean(beanDefinition, element, parserContext);
+        }
+
 
 
         return null;
     }
 
+
+    private static void parseProviderBean(RootBeanDefinition rootBeanDefinition, Element element, ParserContext parserContext) {
+        List<CodecTypeEnum> codecTypeEnumList = new ArrayList<>();
+        String protocol = element.getAttribute("protocol");
+        if (protocol == null || Objects.equals(protocol, "")) {
+            codecTypeEnumList.add(CodecTypeEnum.HESSIAN);
+        } else {
+            String[] protocols = protocol.split(",");
+            for (String item : protocols) {
+                Optional<CodecTypeEnum> optional = EnumFunction.findByKey(CodecTypeEnum.class, String.valueOf(item));
+                if (optional.isPresent()) {
+                    codecTypeEnumList.add(optional.get());
+                } else {
+                    throw new RondaException(ExceptionCode.PROTOCOL_NOT_FOUND);
+                }
+            }
+        }
+        rootBeanDefinition.getPropertyValues().add("protocols", codecTypeEnumList);
+
+    }
+
+
     public BeanDefinition parse(Element element, ParserContext parserContext) {
-        return null;
+        return parse(element, parserContext, beanClass, required);
     }
 }

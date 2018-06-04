@@ -22,7 +22,7 @@ public class RondaServer {
 
     private Channel channel;
 
-    private Map<URL, ServerChannel> channelMap = new HashMap<>();
+    private static Map<URL, ServerChannel> channelMap = new HashMap<>();
 
     public void startServer() {
         URL url = testUrl();
@@ -44,6 +44,10 @@ public class RondaServer {
         url.setPort(22000);
         url.setProtocol(CodecTypeEnum.HESSIAN.getCode().toString());
         return url;
+    }
+
+    public static void putChannelMap(URL url, ServerChannel serverChannel) {
+        channelMap.put(url, serverChannel);
     }
 
 

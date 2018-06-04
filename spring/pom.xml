@@ -12,6 +12,8 @@
 
     <properties>
         <lombok.version>1.16.20</lombok.version>
+        <server.version>1.0-SNAPSHOT</server.version>
+        <client.version>1.0-SNAPSHOT</client.version>
     </properties>
 
     <dependencyManagement>
@@ -37,7 +39,16 @@
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>cn.panda.ronda</groupId>
+            <artifactId>server</artifactId>
+            <version>${server.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.panda.ronda</groupId>
+            <artifactId>client</artifactId>
+            <version>${client.version}</version>
+        </dependency>
     </dependencies>
 
 </project>
