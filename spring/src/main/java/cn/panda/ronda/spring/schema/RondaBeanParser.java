@@ -4,6 +4,7 @@ import cn.panda.ronda.base.remoting.codec.CodecTypeEnum;
 import cn.panda.ronda.base.remoting.exception.ExceptionCode;
 import cn.panda.ronda.base.remoting.exception.RondaException;
 import cn.panda.ronda.base.remoting.helper.EnumFunction;
+import cn.panda.ronda.spring.config.ConsumerBean;
 import cn.panda.ronda.spring.config.ProviderBean;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -63,12 +64,15 @@ public class RondaBeanParser implements BeanDefinitionParser {
             parseProviderBean(beanDefinition, element, parserContext);
         }
 
+        if (ConsumerBean.class.isAssignableFrom(beanClass)) {
+
+        }
 
 
         return null;
     }
 
-
+    @SuppressWarnings("Duplicates")
     private static void parseProviderBean(RootBeanDefinition rootBeanDefinition, Element element, ParserContext parserContext) {
         List<CodecTypeEnum> codecTypeEnumList = new ArrayList<>();
         String protocol = element.getAttribute("protocol");
@@ -87,6 +91,28 @@ public class RondaBeanParser implements BeanDefinitionParser {
         }
         rootBeanDefinition.getPropertyValues().add("protocols", codecTypeEnumList);
 
+    }
+
+    @SuppressWarnings("Duplicates")
+    private static void parseConsumerBean(RootBeanDefinition rootBeanDefinition, Element element, ParserContext parserContext) {
+        List<CodecTypeEnum> codecTypeEnumList = new ArrayList<>();
+        String protocol = element.getAttribute("protocol");
+        if (protocol == null || Objects.equals(protocol, "")) {
+            codecTypeEnumList.add(CodecTypeEnum.HESSIAN);
+        } else {
+            String[] protocols = protocol.split(",");
+            for (String item : protocols) {
+                Optional<CodecTypeEnum> optional = EnumFunction.findByKey(CodecTypeEnum.class, String.valueOf(item));
+                if (optional.isPresent()) {
+                    codecTypeEnumList.add(optional.get());
+                } else {
+                    throw new RondaException(ExceptionCode.PROTOCOL_NOT_FOUND);
+                }
+            }
+        }
+        rootBeanDefinition.getPropertyValues().add("protocols", codecTypeEnumList);
+
+        rootBeanDefinition.getPropertyValues().add("clazz", rootBeanDefinition.getClass());
     }
 
 

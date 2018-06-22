@@ -53,6 +53,11 @@ public class RondaClient implements ExchangeClient {
         remoteMap.put(transportConfig, nettyChannel);
     }
 
+    public static void putRemoteMap(TransportConfig transportConfig, Channel channel) {
+        remoteMap.put(transportConfig, channel);
+    }
+
+
     @Override
     public ResponseMessage invoke(RequestMessage requestMessage) {
         this.channel = getChannel(requestMessage);

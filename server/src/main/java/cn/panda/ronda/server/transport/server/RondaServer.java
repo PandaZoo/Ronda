@@ -8,6 +8,7 @@ import cn.panda.ronda.server.transport.config.URL;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.security.Key;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,5 +51,14 @@ public class RondaServer {
         channelMap.put(url, serverChannel);
     }
 
+    public static URL getChannelMap(CodecTypeEnum codecTypeEnum) {
+        for (Map.Entry<URL, ServerChannel> entry : channelMap.entrySet()) {
+            if (Integer.parseInt(entry.getKey().getProtocol()) == (codecTypeEnum.getCode())) {
+                return entry.getKey();
+            }
+        }
+
+        return null;
+    }
 
 }
