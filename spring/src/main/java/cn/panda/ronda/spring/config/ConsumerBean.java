@@ -29,6 +29,8 @@ import java.util.List;
 public class ConsumerBean implements java.io.Serializable, InitializingBean, DisposableBean, ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>,
         BeanNameAware {
 
+    private static final long serialVersionUID = 5089964364356016136L;
+
     private transient String beanName;
     private List<CodecTypeEnum> protocols;
     private Class<?> clazz;

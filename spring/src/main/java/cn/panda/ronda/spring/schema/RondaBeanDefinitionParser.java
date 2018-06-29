@@ -23,12 +23,12 @@ import java.util.Optional;
  * created at 28/05/2018
  */
 @Slf4j
-public class RondaBeanParser implements BeanDefinitionParser {
+public class RondaBeanDefinitionParser implements BeanDefinitionParser {
 
     private final Class<?> beanClass;
     private final boolean required;
 
-    public RondaBeanParser(Class<?> beanClass, boolean required) {
+    public RondaBeanDefinitionParser(Class<?> beanClass, boolean required) {
         this.beanClass = beanClass;
         this.required = required;
     }
@@ -65,11 +65,10 @@ public class RondaBeanParser implements BeanDefinitionParser {
         }
 
         if (ConsumerBean.class.isAssignableFrom(beanClass)) {
-
+            parseConsumerBean(beanDefinition, element, parserContext);
         }
 
-
-        return null;
+        return beanDefinition;
     }
 
     @SuppressWarnings("Duplicates")
