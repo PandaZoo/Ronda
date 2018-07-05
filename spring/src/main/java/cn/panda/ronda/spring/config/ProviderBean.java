@@ -5,10 +5,13 @@ import cn.panda.ronda.base.remoting.exchange.ServerChannel;
 import cn.panda.ronda.server.transport.channel.ServerNettyChannel;
 import cn.panda.ronda.server.transport.config.URL;
 import cn.panda.ronda.server.transport.server.RondaServer;
+import cn.panda.ronda.spring.advice.InvokeInterceptor;
 import lombok.Data;
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -25,7 +28,7 @@ import java.util.List;
  * created at 28/05/2018
  */
 @Data
-public class ProviderBean<T> extends ServiceConfig<T> implements InitializingBean, DisposableBean, ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>,
+public class ProviderBean<T> extends ServiceConfig<T> implements FactoryBean<T>, InitializingBean, DisposableBean, ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>,
         BeanNameAware {
 
 
@@ -40,6 +43,8 @@ public class ProviderBean<T> extends ServiceConfig<T> implements InitializingBea
     private transient boolean supportedApplicationListener;
 
     private List<CodecTypeEnum> protocols;
+
+    private Class<T> clazz;
 
 
     public ProviderBean() {
@@ -116,5 +121,20 @@ public class ProviderBean<T> extends ServiceConfig<T> implements InitializingBea
      */
     public void setBeanName(String name) {
         this.beanName = name;
+    }
+
+    /**
+     *
+     */
+    @Override
+    public T getObject() throws Exception {
+        ProxyFactory proxyFactory = new ProxyFactory(this);
+        proxyFactory.addAdvice(new InvokeInterceptor());
+        return null;
+    }
+
+    @Override
+    public Class<?> getObjectType() {
+        return this.clazz;
     }
 }
