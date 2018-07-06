@@ -5,9 +5,12 @@
     http://www.ronda.com/schema/ronda http://www.ronda.com/schema/ronda/ronda.xsd">
 
     <ronda:registry id="firstRegistry" protocol="ronda" port="2800" address="127.0.0.1" />
+
+    <bean id="helloServieOri" class="cn.panda.ronda.spring.service.impl.HelloServiceImpl" />
     
-    <ronda:provider interface="cn.panda.ronda.spring.service.HelloService" registry="firstRegistry" protocol="ronda" ref="helloService" />
+    <ronda:provider id="firstProvider" interface="cn.panda.ronda.spring.service.HelloService" registry="firstRegistry" protocol="json"
+                    ref="helloServieOri" />
 
     <ronda:consumer id="firstConsumer" interface="cn.panda.ronda.spring.service.HelloService" registry="firstRegistry"
-                    protocol="ronda" retries="3" timeout="5" />
+                    protocol="json" retries="3" timeout="5" />
 </beans>

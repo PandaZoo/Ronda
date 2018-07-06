@@ -38,6 +38,8 @@ public class ProviderBean<T> extends ServiceConfig<T> implements FactoryBean<T>,
 
     private transient ApplicationContext applicationContext;
 
+    private String id;
+
     private transient String beanName;
 
     private transient boolean supportedApplicationListener;
@@ -46,6 +48,7 @@ public class ProviderBean<T> extends ServiceConfig<T> implements FactoryBean<T>,
 
     private Class<T> clazz;
 
+    private String refName;
 
     public ProviderBean() {
         super();
@@ -61,6 +64,12 @@ public class ProviderBean<T> extends ServiceConfig<T> implements FactoryBean<T>,
      * 主要是为了export
      */
     public void afterPropertiesSet() throws Exception {
+        // set bean ref
+        if (this.getRefName() != null) {
+            T t = (T) applicationContext.getBean(this.getRefName());
+            this.setRef(t);
+        }
+
         doExport();
     }
 
@@ -128,9 +137,9 @@ public class ProviderBean<T> extends ServiceConfig<T> implements FactoryBean<T>,
      */
     @Override
     public T getObject() throws Exception {
-        ProxyFactory proxyFactory = new ProxyFactory(this);
+        ProxyFactory proxyFactory = new ProxyFactory(this.getRef());
         proxyFactory.addAdvice(new InvokeInterceptor());
-        return null;
+        return (T) proxyFactory.getProxy();
     }
 
     @Override

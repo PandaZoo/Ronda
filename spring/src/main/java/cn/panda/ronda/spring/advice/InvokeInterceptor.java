@@ -1,5 +1,6 @@
 package cn.panda.ronda.spring.advice;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -7,6 +8,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * @author yongkang.zhang
  * created at 05/07/2018
  */
+@Slf4j
 public class InvokeInterceptor implements MethodInterceptor {
 
     /**
@@ -18,8 +20,8 @@ public class InvokeInterceptor implements MethodInterceptor {
      */
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
+        log.info("InvokeInterceptor intercepting..., invocation: {}", invocation);
 
-
-        return null;
+        return invocation.proceed();
     }
 }

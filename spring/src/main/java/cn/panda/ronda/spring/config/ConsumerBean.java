@@ -8,6 +8,7 @@ import cn.panda.ronda.client.transport.client.RondaClient;
 import cn.panda.ronda.client.transport.config.TransportConfig;
 import cn.panda.ronda.server.transport.config.URL;
 import cn.panda.ronda.server.transport.server.RondaServer;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Lists;
 import org.springframework.beans.BeansException;
@@ -26,11 +27,13 @@ import java.util.List;
  * created at 28/05/2018
  */
 @Slf4j
+@Data
 public class ConsumerBean implements java.io.Serializable, InitializingBean, DisposableBean, ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>,
         BeanNameAware {
 
     private static final long serialVersionUID = 5089964364356016136L;
 
+    private String id;
     private transient String beanName;
     private List<CodecTypeEnum> protocols;
     private Class<?> clazz;

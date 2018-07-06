@@ -80,7 +80,7 @@ public class RondaBeanDefinitionParser implements BeanDefinitionParser {
         } else {
             String[] protocols = protocol.split(",");
             for (String item : protocols) {
-                Optional<CodecTypeEnum> optional = EnumFunction.findByKey(CodecTypeEnum.class, String.valueOf(item));
+                Optional<CodecTypeEnum> optional = CodecTypeEnum.getByValue(String.valueOf(item).toLowerCase());
                 if (optional.isPresent()) {
                     codecTypeEnumList.add(optional.get());
                 } else {
@@ -90,6 +90,18 @@ public class RondaBeanDefinitionParser implements BeanDefinitionParser {
         }
         rootBeanDefinition.getPropertyValues().add("protocols", codecTypeEnumList);
 
+        // parse interface
+        String interfaceName = element.getAttribute("interface");
+        try {
+            Class<?> aClass = Class.forName(interfaceName);
+            rootBeanDefinition.getPropertyValues().add("clazz", aClass);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        // parse ref
+        String refBeanName = element.getAttribute("ref");
+        rootBeanDefinition.getPropertyValues().add("refName", refBeanName);
     }
 
     @SuppressWarnings("Duplicates")
@@ -101,7 +113,7 @@ public class RondaBeanDefinitionParser implements BeanDefinitionParser {
         } else {
             String[] protocols = protocol.split(",");
             for (String item : protocols) {
-                Optional<CodecTypeEnum> optional = EnumFunction.findByKey(CodecTypeEnum.class, String.valueOf(item));
+                Optional<CodecTypeEnum> optional = CodecTypeEnum.getByValue(String.valueOf(item).toLowerCase());
                 if (optional.isPresent()) {
                     codecTypeEnumList.add(optional.get());
                 } else {
@@ -111,7 +123,14 @@ public class RondaBeanDefinitionParser implements BeanDefinitionParser {
         }
         rootBeanDefinition.getPropertyValues().add("protocols", codecTypeEnumList);
 
-        rootBeanDefinition.getPropertyValues().add("clazz", rootBeanDefinition.getClass());
+        // parse interface
+        String interfaceName = element.getAttribute("interface");
+        try {
+            Class<?> aClass = Class.forName(interfaceName);
+            rootBeanDefinition.getPropertyValues().add("clazz", aClass);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
 
