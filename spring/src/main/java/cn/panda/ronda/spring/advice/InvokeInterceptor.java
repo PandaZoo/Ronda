@@ -1,8 +1,14 @@
 package cn.panda.ronda.spring.advice;
 
+import cn.panda.ronda.base.remoting.message.RequestMessage;
+import cn.panda.ronda.base.remoting.message.ResponseMessage;
+import cn.panda.ronda.client.transport.client.RondaClient;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.lang.reflect.Method;
 
 /**
  * @author yongkang.zhang
@@ -10,6 +16,8 @@ import org.aopalliance.intercept.MethodInvocation;
  */
 @Slf4j
 public class InvokeInterceptor implements MethodInterceptor {
+
+    private RondaClient rondaClient = new RondaClient();
 
     /**
      * 在这里实现调用的delegate
@@ -21,7 +29,30 @@ public class InvokeInterceptor implements MethodInterceptor {
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
         log.info("InvokeInterceptor intercepting..., invocation: {}", invocation);
+        RequestMessage requestMessage = invocationToRequestMessage(invocation);
+        ResponseMessage responseMessage = rondaClient.invoke(requestMessage);
 
-        return invocation.proceed();
+        // 判断response message
+        if (responseMessage.getReturnCode() == 1) {
+            String body = responseMessage.getBody();
+            // deserialize
+            log.info("返回结果是: {}", body);
+        } else {
+            log.error("请求错误, invocation: {}, requestMessage: {}, responseMessage: {}", invocation, requestMessage, responseMessage);
+        }
+
+        return null;
+    }
+
+    public RequestMessage invocationToRequestMessage(MethodInvocation invocation) {
+        RequestMessage requestMessage = new RequestMessage();
+        Method method = invocation.getMethod();
+        requestMessage.setTargetClass(method.getDeclaringClass().getName());
+        requestMessage.setTargetMethod(method.getName());
+        requestMessage.setArgType(method.getParameterTypes());
+        requestMessage.setArgs(invocation.getArguments());
+        // todo 是否替换更更唯一的
+        requestMessage.setMessageId(System.currentTimeMillis());
+        return requestMessage;
     }
 }

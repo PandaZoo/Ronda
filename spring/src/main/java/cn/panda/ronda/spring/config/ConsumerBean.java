@@ -8,12 +8,15 @@ import cn.panda.ronda.client.transport.client.RondaClient;
 import cn.panda.ronda.client.transport.config.TransportConfig;
 import cn.panda.ronda.server.transport.config.URL;
 import cn.panda.ronda.server.transport.server.RondaServer;
+import cn.panda.ronda.spring.advice.InvokeInterceptor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Lists;
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -28,7 +31,7 @@ import java.util.List;
  */
 @Slf4j
 @Data
-public class ConsumerBean implements java.io.Serializable, InitializingBean, DisposableBean, ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>,
+public class ConsumerBean<T> implements FactoryBean<T>, java.io.Serializable, InitializingBean, DisposableBean, ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>,
         BeanNameAware {
 
     private static final long serialVersionUID = 5089964364356016136L;
@@ -37,6 +40,7 @@ public class ConsumerBean implements java.io.Serializable, InitializingBean, Dis
     private transient String beanName;
     private List<CodecTypeEnum> protocols;
     private Class<?> clazz;
+    private T provider;
 
     @Override
     public void setBeanName(String name) {
@@ -53,7 +57,7 @@ public class ConsumerBean implements java.io.Serializable, InitializingBean, Dis
      */
     @Override
     public void afterPropertiesSet() throws Exception {
-
+        connect();
     }
 
     private void connect() {
@@ -71,6 +75,7 @@ public class ConsumerBean implements java.io.Serializable, InitializingBean, Dis
             transportConfig.setRemotePort(url.getPort());
             transportConfig.setProtocol(String.valueOf(codecTypeEnum.getCode()));
             NettyChannel nettyChannel = new NettyChannel(transportConfig);
+            nettyChannel.connect(null);
             RondaClient.putRemoteMap(transportConfig, nettyChannel);
         }
 
@@ -86,4 +91,17 @@ public class ConsumerBean implements java.io.Serializable, InitializingBean, Dis
 
     }
 
+    /**
+     *
+     */
+    @Override
+    public T getObject() throws Exception {
+        ProxyFactory proxyFactory = new ProxyFactory(this.clazz, new InvokeInterceptor());
+        return (T) proxyFactory.getProxy();
+    }
+
+    @Override
+    public Class<?> getObjectType() {
+        return this.clazz;
+    }
 }

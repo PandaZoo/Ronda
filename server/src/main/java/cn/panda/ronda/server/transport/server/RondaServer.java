@@ -43,7 +43,7 @@ public class RondaServer {
         URL url = new URL();
         url.setAddress("127.0.0.1");
         url.setPort(22000);
-        url.setProtocol(CodecTypeEnum.HESSIAN.getCode().toString());
+        url.setProtocol(CodecTypeEnum.JSON.getCode().toString());
         return url;
     }
 

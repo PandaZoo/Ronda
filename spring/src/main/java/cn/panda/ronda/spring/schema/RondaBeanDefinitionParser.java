@@ -3,11 +3,11 @@ package cn.panda.ronda.spring.schema;
 import cn.panda.ronda.base.remoting.codec.CodecTypeEnum;
 import cn.panda.ronda.base.remoting.exception.ExceptionCode;
 import cn.panda.ronda.base.remoting.exception.RondaException;
-import cn.panda.ronda.base.remoting.helper.EnumFunction;
 import cn.panda.ronda.spring.config.ConsumerBean;
 import cn.panda.ronda.spring.config.ProviderBean;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.RuntimeBeanNameReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -94,14 +94,17 @@ public class RondaBeanDefinitionParser implements BeanDefinitionParser {
         String interfaceName = element.getAttribute("interface");
         try {
             Class<?> aClass = Class.forName(interfaceName);
-            rootBeanDefinition.getPropertyValues().add("clazz", aClass);
+            rootBeanDefinition.getPropertyValues().add("interfaceClass", aClass);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
 
         // parse ref
         String refBeanName = element.getAttribute("ref");
-        rootBeanDefinition.getPropertyValues().add("refName", refBeanName);
+        if (parserContext.getRegistry().containsBeanDefinition(refBeanName)) {
+            rootBeanDefinition.getPropertyValues().add("ref", new RuntimeBeanNameReference(refBeanName));
+        }
+
     }
 
     @SuppressWarnings("Duplicates")

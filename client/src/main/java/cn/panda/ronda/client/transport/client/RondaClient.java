@@ -13,6 +13,7 @@ import cn.panda.ronda.client.transport.channel.NettyChannel;
 import cn.panda.ronda.client.transport.config.TransportConfig;
 import cn.panda.ronda.client.util.NettyUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ import java.util.concurrent.ExecutionException;
  * added at 2018/4/9
  */
 @Slf4j
+@Component
 public class RondaClient implements ExchangeClient {
 
     private Channel channel;
