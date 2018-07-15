@@ -9,6 +9,7 @@ import cn.panda.ronda.client.transport.config.TransportConfig;
 import cn.panda.ronda.server.transport.config.URL;
 import cn.panda.ronda.server.transport.server.RondaServer;
 import cn.panda.ronda.spring.advice.InvokeInterceptor;
+import cn.panda.ronda.spring.annotation.Consumer;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Lists;
@@ -31,7 +32,7 @@ import java.util.List;
  */
 @Slf4j
 @Data
-public class ConsumerBean<T> implements FactoryBean<T>, java.io.Serializable, InitializingBean, DisposableBean, ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>,
+public class ConsumerBean<T> extends AbstractInterfaceConfig implements FactoryBean<T>, java.io.Serializable, InitializingBean, DisposableBean, ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>,
         BeanNameAware {
 
     private static final long serialVersionUID = 5089964364356016136L;
@@ -41,6 +42,11 @@ public class ConsumerBean<T> implements FactoryBean<T>, java.io.Serializable, In
     private List<CodecTypeEnum> protocols;
     private Class<?> clazz;
     private T provider;
+    private Consumer consumer;
+
+    public ConsumerBean(Consumer consumer) {
+        this.consumer = consumer;
+    }
 
     @Override
     public void setBeanName(String name) {

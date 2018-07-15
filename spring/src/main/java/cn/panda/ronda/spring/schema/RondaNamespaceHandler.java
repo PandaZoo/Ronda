@@ -15,5 +15,6 @@ public class RondaNamespaceHandler extends NamespaceHandlerSupport {
         registerBeanDefinitionParser("provider", new RondaBeanDefinitionParser(ProviderBean.class, true));
         registerBeanDefinitionParser("consumer", new RondaBeanDefinitionParser(ConsumerBean.class, true));
         registerBeanDefinitionParser("registry", new RondaBeanDefinitionParser(RegisterBean.class, true));
+        registerBeanDefinitionParser("annotation", new AnnotationBeanDefinitionParser());
     }
 }
