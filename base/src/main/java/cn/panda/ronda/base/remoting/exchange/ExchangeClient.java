@@ -12,4 +12,7 @@ public interface ExchangeClient extends Channel {
 
     ResponseMessage invoke(RequestMessage requestMessage);
 
+    default Boolean isConnected() {
+        return null;
+    }
 }

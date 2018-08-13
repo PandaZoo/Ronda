@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ronda="http://www.ronda.com/schema/ronda"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-    http://www.ronda.com/schema/ronda http://www.ronda.com/schema/ronda/ronda.xsd">
+    http://www.ronda.com/schema/ronda http://www.ronda.com/schema/ronda/ronda.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <ronda:registry id="firstRegistry" protocol="ronda" port="2800" address="127.0.0.1" />
+    <ronda:annotation package="cn.panda.ronda.spring" />
+
+    <!--<ronda:registry id="firstRegistry" protocol="ronda" port="2800" address="127.0.0.1" />
 
     <bean id="helloServieOri" class="cn.panda.ronda.spring.service.impl.HelloServiceImpl" />
     
@@ -12,5 +15,6 @@
                     ref="helloServieOri" />
 
     <ronda:consumer id="firstConsumer" interface="cn.panda.ronda.spring.service.HelloService" registry="firstRegistry"
-                    protocol="json" retries="3" timeout="5" />
+                    protocol="json" retries="3" timeout="5" /-->
+    <context:component-scan base-package="cn.panda.ronda.spring" />
 </beans>

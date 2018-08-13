@@ -23,6 +23,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.util.Assert;
 
 import java.util.List;
 
@@ -43,6 +44,7 @@ public class ConsumerBean<T> extends AbstractInterfaceConfig implements FactoryB
     private Class<?> clazz;
     private T provider;
     private Consumer consumer;
+    private boolean isConnect;
 
     public ConsumerBean(Consumer consumer) {
         this.consumer = consumer;
@@ -67,13 +69,21 @@ public class ConsumerBean<T> extends AbstractInterfaceConfig implements FactoryB
     }
 
     private void connect() {
+        if (this.isConnect) {
+            return;
+        }
+
         if (protocols == null || protocols.isEmpty()) {
             throw new RondaException(ExceptionCode.CHANNEL_NOT_FOUND);
         }
 
         for (CodecTypeEnum codecTypeEnum : protocols) {
             URL url = RondaServer.getChannelMap(codecTypeEnum);
-            assert url != null;
+
+            if (url == null) {
+                continue;
+            }
+            // Assert.isTrue(url != null, "找不到channel对应的provider");
 
             TransportConfig transportConfig = new cn.panda.ronda.client.transport.config.TransportConfig();
             transportConfig.setServiceClass(clazz);
@@ -84,6 +94,8 @@ public class ConsumerBean<T> extends AbstractInterfaceConfig implements FactoryB
             nettyChannel.connect(null);
             RondaClient.putRemoteMap(transportConfig, nettyChannel);
         }
+
+        this.isConnect = true;
 
     }
 

@@ -20,6 +20,12 @@ import static org.springframework.util.StringUtils.trimArrayElements;
  */
 public class AnnotationBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
+    /**
+     * 通过
+     * @param element 元素
+     * @param parserContext 解析上下文
+     * @param builder builder
+     */
     @Override
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
         String packageToScan = element.getAttribute("package");
@@ -39,7 +45,7 @@ public class AnnotationBeanDefinitionParser extends AbstractSingleBeanDefinition
     }
 
     private void registerConsumerAnnotationBeanPostProcessor(BeanDefinitionRegistry registry) {
-        // Register @Reference Annotation Bean Processor
+        // Register @Consumer Annotation Bean Processor
         BeanRegistrar.registerInfrastructureBean(registry, ConsumerAnnotationBeanPostProcessor.BEAN_NAME, ConsumerAnnotationBeanPostProcessor.class);
     }
 

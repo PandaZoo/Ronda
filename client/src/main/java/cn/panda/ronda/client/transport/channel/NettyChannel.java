@@ -109,4 +109,9 @@ public class NettyChannel implements Channel {
         }
         return null;
     }
+
+    @Override
+    public Boolean isConnected() {
+        return this.isConnected;
+    }
 }

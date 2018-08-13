@@ -7,6 +7,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.InjectionMetadata;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.PriorityOrdered;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -31,7 +33,6 @@ import java.util.concurrent.ConcurrentMap;
 import static org.springframework.core.BridgeMethodResolver.findBridgedMethod;
 import static org.springframework.core.BridgeMethodResolver.isVisibilityBridgeMethodPair;
 import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;
-import static org.springframework.core.annotation.AnnotationUtils.getAnnotation;
 
 /**
  * @author yongkang.zhang
@@ -57,7 +58,17 @@ public class ConsumerAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 
     @Override
     public PropertyValues postProcessPropertyValues(PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
-        return super.postProcessPropertyValues(pvs, pds, bean, beanName);
+        InjectionMetadata metadata = findConsumerMetadata(beanName, bean.getClass(), pvs);
+        try {
+            metadata.inject(bean, beanName, pvs);
+        }
+        catch (BeanCreationException ex) {
+            throw ex;
+        }
+        catch (Throwable ex) {
+            throw new BeanCreationException(beanName, "Injection of autowired dependencies failed", ex);
+        }
+        return pvs;
     }
 
     private InjectionMetadata findConsumerMetadata(String beanName, Class<?> clazz, PropertyValues pvs) {
@@ -105,12 +116,11 @@ public class ConsumerAnnotationBeanPostProcessor extends InstantiationAwareBeanP
     private List<InjectionMetadata.InjectedElement> findFieldReferenceMetadata(final Class<?> beanClass) {
 
         final List<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
-
         ReflectionUtils.doWithFields(beanClass, new ReflectionUtils.FieldCallback() {
             @Override
             public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
 
-                Consumer consumer = getAnnotation(field, Consumer.class);
+                Consumer consumer = AnnotatedElementUtils.getMergedAnnotation(field, Consumer.class);
 
                 if (consumer != null) {
 

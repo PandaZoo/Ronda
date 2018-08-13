@@ -21,6 +21,8 @@ public interface Channel {
      */
     void connect(String url);
 
+    Boolean isConnected();
+
     /**
      * @param url host和port
      */

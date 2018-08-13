@@ -7,7 +7,7 @@ import java.lang.annotation.*;
 /**
  * 使用在引用上，解析为consumer
  */
-@Target({ElementType.TYPE})
+@Target({ElementType.FIELD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Component
@@ -17,11 +17,11 @@ public @interface Consumer {
 
     Class<?> interfaceClass();
 
-    String interfaceName();
+    String interfaceName() default "";
 
-    String registry();
+    String registry() default "";
 
-    String[] protocols();
+    String[] protocols() default "json";
 
     int retryTimes() default 1;
 

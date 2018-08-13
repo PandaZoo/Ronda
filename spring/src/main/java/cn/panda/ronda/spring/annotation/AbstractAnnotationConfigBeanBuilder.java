@@ -16,6 +16,7 @@
  */
 package cn.panda.ronda.spring.annotation;
 
+import cn.panda.ronda.base.remoting.codec.CodecTypeEnum;
 import cn.panda.ronda.spring.config.AbstractInterfaceConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,7 +24,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
 import java.lang.annotation.Annotation;
-
+import java.util.List;
 
 
 /**
@@ -43,6 +44,8 @@ abstract class AbstractAnnotationConfigBeanBuilder<A extends Annotation, B exten
     protected Object bean;
 
     protected Class<?> interfaceClass;
+
+    protected List<CodecTypeEnum> codecTypeEnumList;
 
     protected AbstractAnnotationConfigBeanBuilder(A annotation, ClassLoader classLoader,
                                                   ApplicationContext applicationContext) {

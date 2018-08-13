@@ -1,7 +1,9 @@
 package cn.panda.ronda.spring.annotation;
 
+import cn.panda.ronda.base.remoting.codec.CodecTypeEnum;
 import cn.panda.ronda.spring.config.ProviderBean;
 import cn.panda.ronda.spring.schema.RondaBeanDefinitionParser;
+import org.assertj.core.util.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -16,6 +18,7 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.AnnotationBeanNameGenerator;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
@@ -66,7 +69,7 @@ public class ProviderAnnotationBeanPostProcessor implements BeanDefinitionRegist
         Set<String> resolvePackagesToScan = resolvePackagesToScan(packagesToScan);
 
         if (!CollectionUtils.isEmpty(resolvePackagesToScan)) {
-
+            registerProviderBeans(packagesToScan, registry);
         } else {
             logger.warn("packagesToScan is empty, ServiceBean registry will be ignored!");
         }
@@ -76,8 +79,9 @@ public class ProviderAnnotationBeanPostProcessor implements BeanDefinitionRegist
 
     /**
      * Register Beans whose classes was annotated
-     * @param packagesToScan
-     * @param registry
+     *
+     * @param packagesToScan 要扫描的包
+     * @param registry       bean注册管理类
      */
     private void registerProviderBeans(Set<String> packagesToScan, BeanDefinitionRegistry registry) {
         RondaBeanPathScanner rondaBeanPathScanner = new RondaBeanPathScanner(registry, environment, resourceLoader);
@@ -102,7 +106,7 @@ public class ProviderAnnotationBeanPostProcessor implements BeanDefinitionRegist
                 }
 
                 logger.info(beanDefinitionHolders.size() + "annotated Ronda's @Provider Components { " +
-                            beanDefinitionHolders + " } were scanned under package[" + packagesToScan + "]");
+                        beanDefinitionHolders + " } were scanned under package[" + packagesToScan + "]");
             } else {
                 logger.warn("No SpringBean annotating Ronda's @Provider was found under package[" + packageToScan + "]");
             }
@@ -120,7 +124,7 @@ public class ProviderAnnotationBeanPostProcessor implements BeanDefinitionRegist
         if (beanNameGenerator == null) {
             logger.info("BeanNameGenerator bean can't be found in BeanFactory with name [" + CONFIGURATION_BEAN_NAME_GENERATOR + "]");
             logger.info("BeanNameGenerator will be a instance of " + AnnotationBeanNameGenerator.class.getName() +
-            ", it maybe a potential problem on bean name generation.");
+                    ", it maybe a potential problem on bean name generation.");
 
             beanNameGenerator = new AnnotationBeanNameGenerator();
         }
@@ -160,7 +164,13 @@ public class ProviderAnnotationBeanPostProcessor implements BeanDefinitionRegist
 
         Class<?> beanClass = resolveClass(beanDefinitionHolder);
 
-        Provider provider = AnnotationUtils.findAnnotation(beanClass, Provider.class);
+        // see https://jira.spring.io/browse/SPR-13440 Use AnnotatedElementUtils instead of AnnotationUtils wherever feasible
+        Provider provider = AnnotatedElementUtils.getMergedAnnotation(beanClass, Provider.class);
+
+        if (provider == null) {
+            logger.warn("provider annotation not found on class {}", beanClass);
+            return;
+        }
 
         Class<?> interfaceClass = resolveInterfaceClass(beanClass, provider);
 
@@ -175,11 +185,11 @@ public class ProviderAnnotationBeanPostProcessor implements BeanDefinitionRegist
             beanDefinitionRegistry.registerBeanDefinition(beanName, providerBeanDefinition);
 
             logger.warn("The BeanDefinition[" + providerBeanDefinition +
-                        "] of ProviderBean has been registered with name: " + beanName);
+                    "] of ProviderBean has been registered with name: " + beanName);
         } else {
             logger.warn("The Duplicated BeanDefinition[" + providerBeanDefinition +
-                        "] of ProviderBean [ bean name : " + beanName +
-                        "] was found, Did @RondaComponentScan scan to same package in many times?");
+                    "] of ProviderBean [ bean name : " + beanName +
+                    "] was found, Did @RondaComponentScan scan to same package in many times?");
         }
     }
 
@@ -198,11 +208,13 @@ public class ProviderAnnotationBeanPostProcessor implements BeanDefinitionRegist
 
 
     private AbstractBeanDefinition buildProviderBeanDefinition(Provider provider, Class<?> interfaceClass,
-                                                              String annotatedProviderBeanName) {
+                                                               String annotatedProviderBeanName) {
         BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(ProviderBean.class)
                 .addConstructorArgValue(provider)
-                .addPropertyReference("ref", annotatedProviderBeanName)
-                .addPropertyReference("interface", interfaceClass.getName());
+                // todo 这里需要判断下是否引用reference
+                // .addPropertyReference("ref", annotatedProviderBeanName)
+                .addPropertyValue("ref", annotatedProviderBeanName)
+                .addPropertyValue("interfaceName", interfaceClass.getName());
 
 
         // add id
@@ -213,6 +225,9 @@ public class ProviderAnnotationBeanPostProcessor implements BeanDefinitionRegist
 
         // add protocols todo 具体实现
         String[] protocols = provider.protocols();
+        // todo 更换为根据实际的值进行引用的 并且放到下面
+        builder.addPropertyValue("protocols", Lists.newArrayList(CodecTypeEnum.JSON));
+
 
         return builder.getBeanDefinition();
     }

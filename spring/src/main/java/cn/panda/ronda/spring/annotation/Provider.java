@@ -29,11 +29,11 @@ public @interface Provider {
     /**
      * @return registry
      */
-    String registry();
+    String registry() default "";
 
     /**
      * 协议
      */
-    String[] protocols();
+    String[] protocols() default "json";
 
 }

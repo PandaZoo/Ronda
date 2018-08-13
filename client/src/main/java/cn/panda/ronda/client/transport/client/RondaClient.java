@@ -77,8 +77,16 @@ public class RondaClient implements ExchangeClient {
         }
     }
 
+    /**
+     * 如果transport config 初始化连接失败的时候，在调用的时候会进行再次连接
+     * 并且注册的时候应该提供一个根据调用者信息去查询的方法
+     * todo 需要考虑的一点是 targetClass是存储class还是name?
+     *
+     * @param requestMessage 请求message
+     * @return Channel
+     */
     private Channel getChannel(RequestMessage requestMessage) {
-        Optional<Channel> channelOptional = remoteMap.entrySet()
+        Optional<Channel> channelOptional= remoteMap.entrySet()
                 .stream()
                 .filter(e -> Objects.equals(e.getKey().getServiceClass().getName(), requestMessage.getTargetClass()))
                 .map(Map.Entry::getValue)
@@ -86,9 +94,25 @@ public class RondaClient implements ExchangeClient {
         if (channelOptional.isPresent()) {
             return channelOptional.get();
         } else {
-            throw new BaseException(ExceptionCode.CHANNEL_NOT_FOUND);
+            try {
+                return mockAndCache(requestMessage);
+            } catch (Exception e) {
+                throw new BaseException(ExceptionCode.CHANNEL_NOT_FOUND);
+            }
         }
+    }
 
+    private Channel mockAndCache(RequestMessage requestMessage) throws ClassNotFoundException {
+        TransportConfig transportConfig = new cn.panda.ronda.client.transport.config.TransportConfig();
+        transportConfig.setServiceClass(Class.forName(requestMessage.getTargetClass()));
+        transportConfig.setRemoteIp("127.0.0.1");
+        transportConfig.setRemotePort(22000);
+        transportConfig.setProtocol(String.valueOf(CodecTypeEnum.JSON.getCode()));
+        NettyChannel nettyChannel = new NettyChannel(transportConfig);
+        nettyChannel.connect(null);
+        RondaClient.putRemoteMap(transportConfig, nettyChannel);
+
+        return nettyChannel;
     }
 
 

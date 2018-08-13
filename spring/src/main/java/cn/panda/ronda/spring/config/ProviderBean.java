@@ -5,6 +5,7 @@ import cn.panda.ronda.base.remoting.exchange.ServerChannel;
 import cn.panda.ronda.server.transport.channel.ServerNettyChannel;
 import cn.panda.ronda.server.transport.config.URL;
 import cn.panda.ronda.server.transport.server.RondaServer;
+import cn.panda.ronda.spring.annotation.Provider;
 import lombok.Data;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanNameAware;
@@ -28,6 +29,7 @@ import java.util.List;
 public class ProviderBean<T> extends ServiceConfig<T> implements InitializingBean, DisposableBean, ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>,
         BeanNameAware {
 
+    private Provider provider;
 
     private static final long serialVersionUID = 5649428502281367789L;
 
@@ -43,9 +45,9 @@ public class ProviderBean<T> extends ServiceConfig<T> implements InitializingBea
 
     private List<CodecTypeEnum> protocols;
 
-    public ProviderBean() {
+    public ProviderBean(Provider provider) {
         super();
-        // this.service = null;
+        this.provider = provider;
     }
 
     public static ApplicationContext getSpringContext() {

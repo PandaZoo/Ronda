@@ -16,7 +16,9 @@
  */
 package cn.panda.ronda.spring.annotation;
 
+import cn.panda.ronda.base.remoting.codec.CodecTypeEnum;
 import cn.panda.ronda.spring.config.ConsumerBean;
+import org.assertj.core.util.Lists;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -61,6 +63,15 @@ class ConsumerBeanBuilder extends AbstractAnnotationConfigBeanBuilder<Consumer, 
 
     }
 
+    /**
+     * TODO 具体实现
+     * @param consumer
+     * @param consumerBean
+     */
+    private void configureCodec(Consumer consumer, ConsumerBean consumerBean) {
+        consumerBean.setProtocols(Lists.newArrayList(CodecTypeEnum.JSON));
+    }
+
 
     private void configureConsumerConfig(Consumer consumer, ConsumerBean<?> consumerBean) {
 
@@ -90,6 +101,8 @@ class ConsumerBeanBuilder extends AbstractAnnotationConfigBeanBuilder<Consumer, 
         configureInterface(annotation, bean);
 
         configureConsumerConfig(annotation, bean);
+
+        configureCodec(annotation, bean);
 
         bean.afterPropertiesSet();
 
