@@ -8,7 +8,7 @@ import lombok.Data;
  * added at 2018/4/10
  */
 @Data
-public class TransportConfig {
+public class ChannelConfig {
 
     private Class<?> serviceClass;
 

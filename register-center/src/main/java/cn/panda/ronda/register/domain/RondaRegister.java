@@ -9,8 +9,11 @@ import lombok.Data;
 @Data
 public class RondaRegister {
 
+    /**
+     * 包括端口, 如 127.0.0.1
+     */
     private String host;
 
-    private Integer registerType;
+    private String registerType;
 
 }

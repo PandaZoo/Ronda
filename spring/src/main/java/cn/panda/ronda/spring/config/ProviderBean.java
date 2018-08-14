@@ -6,11 +6,13 @@ import cn.panda.ronda.server.transport.channel.ServerNettyChannel;
 import cn.panda.ronda.server.transport.config.URL;
 import cn.panda.ronda.server.transport.server.RondaServer;
 import cn.panda.ronda.spring.annotation.Provider;
+import cn.panda.ronda.spring.registry.RegistryComponent;
 import lombok.Data;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
@@ -21,7 +23,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 /**
- * todo 这里为什么要加service注解
  * @author asdsut
  * created at 28/05/2018
  */
@@ -45,6 +46,8 @@ public class ProviderBean<T> extends ServiceConfig<T> implements InitializingBea
 
     private List<CodecTypeEnum> protocols;
 
+    private RegistryComponent registryComponent;
+
     public ProviderBean(Provider provider) {
         super();
         this.provider = provider;
@@ -63,15 +66,10 @@ public class ProviderBean<T> extends ServiceConfig<T> implements InitializingBea
     }
 
     private void doExport() {
-        for (CodecTypeEnum type : this.getProtocols()) {
-            URL url = new URL();
-            url.setAddress("127.0.0.1");
-            url.setPort(22000);
-            url.setProtocol(String.valueOf(type.getCode()));
-            ServerChannel serverChannel = new ServerNettyChannel(url);
-            RondaServer.putChannelMap(url, serverChannel);
+        if (this.registryComponent == null) {
+            this.registryComponent = applicationContext.getBean(RegistryComponent.class);
         }
-
+        registryComponent.registry(this);
     }
 
     /**

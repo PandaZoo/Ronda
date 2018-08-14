@@ -3,7 +3,7 @@ package cn.panda.ronda.client.util;
 import cn.panda.ronda.base.remoting.codec.JsonCodec;
 import cn.panda.ronda.client.codec.MessageDecoder;
 import cn.panda.ronda.client.codec.MessageEncoder;
-import cn.panda.ronda.client.transport.config.TransportConfig;
+import cn.panda.ronda.client.transport.config.ChannelConfig;
 import cn.panda.ronda.client.transport.handler.NettyHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -27,7 +27,7 @@ public class NettyUtil {
     private static Bootstrap BOOTSTRAP;
     private static EventLoopGroup BOSS_GROUP = new NioEventLoopGroup();
 
-    public static Channel getChannel(TransportConfig transportConfig) {
+    public static Channel getChannel(ChannelConfig transportConfig) {
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(BOSS_GROUP)
                 .option(ChannelOption.SO_KEEPALIVE, true)

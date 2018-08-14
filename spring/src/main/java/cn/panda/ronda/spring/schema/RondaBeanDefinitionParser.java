@@ -3,8 +3,10 @@ package cn.panda.ronda.spring.schema;
 import cn.panda.ronda.base.remoting.codec.CodecTypeEnum;
 import cn.panda.ronda.base.remoting.exception.ExceptionCode;
 import cn.panda.ronda.base.remoting.exception.RondaException;
+import cn.panda.ronda.register.enums.RegisterTypeEnum;
 import cn.panda.ronda.spring.config.ConsumerBean;
 import cn.panda.ronda.spring.config.ProviderBean;
+import cn.panda.ronda.spring.config.RegisterBean;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanNameReference;
@@ -19,6 +21,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
+ * 目前不启用provider和consumer选择哪个注册中心，默认使用redis注册中心
  * @author asdsut
  * created at 28/05/2018
  */
@@ -58,6 +61,10 @@ public class RondaBeanDefinitionParser implements BeanDefinitionParser {
             }
             parserContext.getRegistry().registerBeanDefinition(id, beanDefinition);
             beanDefinition.getPropertyValues().add("id", id);
+        }
+
+        if (RegisterBean.class.isAssignableFrom(beanClass)) {
+            parseRegistry(beanDefinition, element, parserContext);
         }
 
         if (ProviderBean.class.isAssignableFrom(beanClass)) {
@@ -104,7 +111,6 @@ public class RondaBeanDefinitionParser implements BeanDefinitionParser {
         if (parserContext.getRegistry().containsBeanDefinition(refBeanName)) {
             rootBeanDefinition.getPropertyValues().add("ref", new RuntimeBeanNameReference(refBeanName));
         }
-
     }
 
     @SuppressWarnings("Duplicates")
@@ -136,6 +142,28 @@ public class RondaBeanDefinitionParser implements BeanDefinitionParser {
         }
     }
 
+    private static void parseRegistry(RootBeanDefinition rootBeanDefinition, Element element, ParserContext parserContext) {
+        String type = element.getAttribute("type");
+
+        RegisterTypeEnum registerTypeEnum = RegisterTypeEnum.fromCode(type);
+        if (registerTypeEnum == null) {
+            throw new RondaException(ExceptionCode.REGISTER_TYPE_ERROR);
+        }
+
+        rootBeanDefinition.getPropertyValues().add("type", registerTypeEnum.getCode());
+
+        // parse address
+        String address = element.getAttribute("address");
+        if (address != null && !address.equals("")) {
+            rootBeanDefinition.getPropertyValues().add("address", address);
+        }
+
+        // parse port
+        String port = element.getAttribute("port");
+        if (port != null && !port.equals("")) {
+            rootBeanDefinition.getPropertyValues().add("port", Integer.parseInt(port));
+        }
+    }
 
     public BeanDefinition parse(Element element, ParserContext parserContext) {
         return parse(element, parserContext, beanClass, required);

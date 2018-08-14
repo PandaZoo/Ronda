@@ -1,8 +1,8 @@
 package cn.panda.ronda.client.transport.client;
 
 import cn.panda.ronda.base.remoting.codec.CodecTypeEnum;
-import cn.panda.ronda.base.remoting.exception.BaseException;
 import cn.panda.ronda.base.remoting.exception.ExceptionCode;
+import cn.panda.ronda.base.remoting.exception.RondaException;
 import cn.panda.ronda.base.remoting.exchange.Channel;
 import cn.panda.ronda.base.remoting.exchange.ExchangeClient;
 import cn.panda.ronda.base.remoting.message.RequestMessage;
@@ -10,8 +10,8 @@ import cn.panda.ronda.base.remoting.message.ResponseMessage;
 import cn.panda.ronda.client.demo.HelloService;
 import cn.panda.ronda.client.transport.MessageFuture;
 import cn.panda.ronda.client.transport.channel.NettyChannel;
-import cn.panda.ronda.client.transport.config.TransportConfig;
-import cn.panda.ronda.client.util.NettyUtil;
+import cn.panda.ronda.client.transport.config.ChannelConfig;
+import cn.panda.ronda.register.domain.TransportConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -42,21 +42,30 @@ public class RondaClient implements ExchangeClient {
 
     public static final ConcurrentHashMap<Long, MessageFuture<ResponseMessage>> RESPONSE_MAP = new ConcurrentHashMap<>();
 
-    private static final HashMap<TransportConfig, Channel> remoteMap = new HashMap<>();
+    private static final HashMap<TransportConfig, Channel> clientMap = new HashMap<>();
 
     static {
         TransportConfig transportConfig = new TransportConfig();
         transportConfig.setProtocol(String.valueOf(CodecTypeEnum.HESSIAN.getCode()));
-        transportConfig.setRemoteIp("127.0.0.1");
-        transportConfig.setRemotePort(22000);
-        transportConfig.setServiceClass(HelloService.class);
-        NettyChannel nettyChannel = new NettyChannel(transportConfig);
-        nettyChannel.connect(null);
-        remoteMap.put(transportConfig, nettyChannel);
+        transportConfig.setClassName(HelloService.class.getName());
+
+        ChannelConfig channelConfig = new ChannelConfig();
+        channelConfig.setProtocol(String.valueOf(CodecTypeEnum.HESSIAN.getCode()));
+        channelConfig.setRemoteIp("127.0.0.1");
+        channelConfig.setRemotePort(22000);
+        channelConfig.setServiceClass(HelloService.class);
+
+        NettyChannel nettyChannel = new NettyChannel(channelConfig);
+        nettyChannel.connect();
+        clientMap.put(transportConfig, nettyChannel);
     }
 
-    public static void putRemoteMap(TransportConfig transportConfig, Channel channel) {
-        remoteMap.put(transportConfig, channel);
+    public static void putCacheMap(TransportConfig transportConfig, Channel channel) {
+        clientMap.put(transportConfig, channel);
+    }
+
+    public static Map<TransportConfig, Channel> getCachedMap() {
+        return clientMap;
     }
 
 
@@ -80,39 +89,23 @@ public class RondaClient implements ExchangeClient {
     /**
      * 如果transport config 初始化连接失败的时候，在调用的时候会进行再次连接
      * 并且注册的时候应该提供一个根据调用者信息去查询的方法
-     * todo 需要考虑的一点是 targetClass是存储class还是name?
      *
      * @param requestMessage 请求message
      * @return Channel
      */
     private Channel getChannel(RequestMessage requestMessage) {
-        Optional<Channel> channelOptional= remoteMap.entrySet()
+        Optional<Map.Entry<TransportConfig, Channel>> entryOptional = clientMap.entrySet()
                 .stream()
-                .filter(e -> Objects.equals(e.getKey().getServiceClass().getName(), requestMessage.getTargetClass()))
-                .map(Map.Entry::getValue)
+                .filter(e -> Objects.equals(e.getKey().getClassName(), requestMessage.getTargetClass()))
                 .findFirst();
-        if (channelOptional.isPresent()) {
-            return channelOptional.get();
-        } else {
-            try {
-                return mockAndCache(requestMessage);
-            } catch (Exception e) {
-                throw new BaseException(ExceptionCode.CHANNEL_NOT_FOUND);
-            }
+
+        if (!entryOptional.isPresent()) {
+            throw new RondaException(ExceptionCode.CHANNEL_NOT_FOUND);
         }
-    }
 
-    private Channel mockAndCache(RequestMessage requestMessage) throws ClassNotFoundException {
-        TransportConfig transportConfig = new cn.panda.ronda.client.transport.config.TransportConfig();
-        transportConfig.setServiceClass(Class.forName(requestMessage.getTargetClass()));
-        transportConfig.setRemoteIp("127.0.0.1");
-        transportConfig.setRemotePort(22000);
-        transportConfig.setProtocol(String.valueOf(CodecTypeEnum.JSON.getCode()));
-        NettyChannel nettyChannel = new NettyChannel(transportConfig);
-        nettyChannel.connect(null);
-        RondaClient.putRemoteMap(transportConfig, nettyChannel);
+        Map.Entry<TransportConfig, Channel> transportConfigChannelEntry = entryOptional.get();
 
-        return nettyChannel;
+        return transportConfigChannelEntry.getValue();
     }
 
 
@@ -122,23 +115,15 @@ public class RondaClient implements ExchangeClient {
     }
 
     @Override
-    public void connect(String url) {
-        // Transport config
-        TransportConfig config = new TransportConfig();
-        config.setProtocol("ronda");
-        config.setRemoteIp("127.0.0.1");
-        config.setRemotePort(8080);
-
+    public void connect() {
     }
 
     @Override
-    public void reconnect(String url) {
-
+    public void reconnect() {
     }
 
     @Override
     public void close() {
-
     }
 
     @Override

@@ -17,8 +17,8 @@ public class RegisterFactoryTest {
     @org.junit.Test
     public void test() {
         RondaRegister rondaRegister = new RondaRegister();
-        rondaRegister.setHost("127.0.0.1:2181");
-        rondaRegister.setRegisterType(RegisterTypeEnum.ZOOKEEPER.getCode());
+        rondaRegister.setHost("127.0.0.1:6379");
+        rondaRegister.setRegisterType(RegisterTypeEnum.REDIS.getCode());
 
         IRegisterApi registerApi = RegisterFactory.getRegisterApi(rondaRegister);
 

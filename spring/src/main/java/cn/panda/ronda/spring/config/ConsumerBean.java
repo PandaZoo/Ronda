@@ -5,14 +5,16 @@ import cn.panda.ronda.base.remoting.exception.ExceptionCode;
 import cn.panda.ronda.base.remoting.exception.RondaException;
 import cn.panda.ronda.client.transport.channel.NettyChannel;
 import cn.panda.ronda.client.transport.client.RondaClient;
-import cn.panda.ronda.client.transport.config.TransportConfig;
-import cn.panda.ronda.server.transport.config.URL;
-import cn.panda.ronda.server.transport.server.RondaServer;
+import cn.panda.ronda.client.transport.config.ChannelConfig;
+import cn.panda.ronda.register.domain.TransportConfig;
+import cn.panda.ronda.register.domain.TransportInfo;
 import cn.panda.ronda.spring.advice.InvokeInterceptor;
+import cn.panda.ronda.spring.advice.ProviderCheckInterceptor;
 import cn.panda.ronda.spring.annotation.Consumer;
+import cn.panda.ronda.spring.annotation.Provider;
+import cn.panda.ronda.spring.registry.RegistryComponent;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.util.Lists;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanNameAware;
@@ -23,7 +25,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.util.Assert;
 
 import java.util.List;
 
@@ -44,7 +45,8 @@ public class ConsumerBean<T> extends AbstractInterfaceConfig implements FactoryB
     private Class<?> clazz;
     private T provider;
     private Consumer consumer;
-    private boolean isConnect;
+    private RegistryComponent registryComponent;
+    private ApplicationContext applicationContext;
 
     public ConsumerBean(Consumer consumer) {
         this.consumer = consumer;
@@ -69,41 +71,45 @@ public class ConsumerBean<T> extends AbstractInterfaceConfig implements FactoryB
     }
 
     private void connect() {
-        if (this.isConnect) {
-            return;
-        }
 
         if (protocols == null || protocols.isEmpty()) {
             throw new RondaException(ExceptionCode.CHANNEL_NOT_FOUND);
         }
 
+        this.registryComponent = this.applicationContext.getBean(RegistryComponent.class);
+
         for (CodecTypeEnum codecTypeEnum : protocols) {
-            URL url = RondaServer.getChannelMap(codecTypeEnum);
 
-            if (url == null) {
-                continue;
-            }
-            // Assert.isTrue(url != null, "找不到channel对应的provider");
-
-            TransportConfig transportConfig = new cn.panda.ronda.client.transport.config.TransportConfig();
-            transportConfig.setServiceClass(clazz);
-            transportConfig.setRemoteIp(url.getAddress());
-            transportConfig.setRemotePort(url.getPort());
+            TransportConfig transportConfig = new TransportConfig();
+            transportConfig.setClassName(this.clazz.getName());
             transportConfig.setProtocol(String.valueOf(codecTypeEnum.getCode()));
-            NettyChannel nettyChannel = new NettyChannel(transportConfig);
-            nettyChannel.connect(null);
-            RondaClient.putRemoteMap(transportConfig, nettyChannel);
+
+            TransportInfo transportInfo = this.registryComponent.getProvider(transportConfig);
+
+            if (transportInfo == null) {
+                RondaClient.putCacheMap(transportConfig, null);
+            } else {
+                ChannelConfig channelConfig = new ChannelConfig();
+                channelConfig.setServiceClass(this.clazz);
+                channelConfig.setRemoteIp(transportInfo.getHost());
+                channelConfig.setRemotePort(transportInfo.getPort());
+                channelConfig.setProtocol(transportConfig.getProtocol());
+                NettyChannel nettyChannel = new NettyChannel(channelConfig);
+                nettyChannel.connect();
+                RondaClient.putCacheMap(transportConfig, nettyChannel);
+            }
         }
-
-        this.isConnect = true;
-
     }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-
+        this.applicationContext = applicationContext;
     }
 
+    /**
+     * 暂时没有lazy加载的bean
+     * @param contextRefreshedEvent 刷新事件
+     */
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
 
@@ -113,8 +119,10 @@ public class ConsumerBean<T> extends AbstractInterfaceConfig implements FactoryB
      *
      */
     @Override
+    @SuppressWarnings("unchecked")
     public T getObject() throws Exception {
-        ProxyFactory proxyFactory = new ProxyFactory(this.clazz, new InvokeInterceptor());
+        ProxyFactory proxyFactory = new ProxyFactory(this.clazz, applicationContext.getBean(ProviderCheckInterceptor.class));
+        proxyFactory.addAdvice(applicationContext.getBean(InvokeInterceptor.class));
         return (T) proxyFactory.getProxy();
     }
 

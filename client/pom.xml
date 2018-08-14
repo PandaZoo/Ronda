@@ -24,6 +24,7 @@
         <netty.version>4.0.23.Final</netty.version>
         <lombok.version>1.16.16</lombok.version>
         <base.version>1.0-SNAPSHOT</base.version>
+        <registry.version>1.0-SNAPSHOT</registry.version>
 
         <!-- plugin version -->
         <compiler.plugin.version>3.7.0</compiler.plugin.version>
@@ -60,6 +61,11 @@
             <groupId>cn.panda.ronda</groupId>
             <artifactId>base</artifactId>
             <version>${base.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.panda.ronda</groupId>
+            <artifactId>register-center</artifactId>
+            <version>${registry.version}</version>
         </dependency>
     </dependencies>
 

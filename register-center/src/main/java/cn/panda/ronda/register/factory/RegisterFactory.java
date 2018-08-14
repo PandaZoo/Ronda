@@ -5,7 +5,9 @@ import cn.panda.ronda.base.remoting.exception.RondaException;
 import cn.panda.ronda.register.api.IRegisterApi;
 import cn.panda.ronda.register.domain.RondaRegister;
 import cn.panda.ronda.register.enums.RegisterTypeEnum;
+import cn.panda.ronda.register.impl.RedisRegister;
 import cn.panda.ronda.register.impl.ZookeeperRegister;
+import cn.panda.ronda.register.infrastructure.RedisComponent;
 import cn.panda.ronda.register.infrastructure.ZookeeperComponent;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,9 +33,10 @@ public class RegisterFactory {
 
         switch (registerTypeEnum) {
             case ZOOKEEPER:
-                iRegisterApi = (IRegisterApi) zookeeperRegister(rondaRegister);
+                iRegisterApi = zookeeperRegister(rondaRegister);
                 break;
             case REDIS:
+                iRegisterApi = redisRegister(rondaRegister);
                 break;
             default:
                 iRegisterApi = null;
@@ -55,6 +58,20 @@ public class RegisterFactory {
         } catch (Exception e) {
             log.error("连接注册中心{}发生错误!", rondaRegister, e);
             throw new RondaException(ExceptionCode.REGISTER_ZOOKEEPER_ERROR);
+        }
+    }
+
+    private static RedisRegister redisRegister(RondaRegister rondaRegister) {
+        try {
+            String host = rondaRegister.getHost();
+            RedisComponent redisComponent = new RedisComponent(host);
+
+            redisComponent.connect();
+
+            return new RedisRegister(redisComponent);
+        } catch (Exception e) {
+            log.error("连接注册中心{}发生错误!", rondaRegister, e);
+            throw new RondaException(ExceptionCode.REGISTER_REDIS_ERROR);
         }
     }
 }

@@ -17,16 +17,14 @@ public interface Channel {
 
     /**
      * 需要host和port
-     * @param url host和port
      */
-    void connect(String url);
+    void connect();
 
     Boolean isConnected();
 
     /**
-     * @param url host和port
      */
-    void reconnect(String url);
+    void reconnect();
 
     void close();
 

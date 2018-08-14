@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 
@@ -15,9 +16,11 @@ import java.lang.reflect.Method;
  * created at 05/07/2018
  */
 @Slf4j
+@Component
 public class InvokeInterceptor implements MethodInterceptor {
 
-    private RondaClient rondaClient = new RondaClient();
+    @Autowired
+    private RondaClient rondaClient;
 
     /**
      * 在这里实现调用的delegate
@@ -51,7 +54,6 @@ public class InvokeInterceptor implements MethodInterceptor {
         requestMessage.setTargetMethod(method.getName());
         requestMessage.setArgType(method.getParameterTypes());
         requestMessage.setArgs(invocation.getArguments());
-        // todo 是否替换更更唯一的
         requestMessage.setMessageId(System.currentTimeMillis());
         return requestMessage;
     }

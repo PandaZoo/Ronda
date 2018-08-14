@@ -16,5 +16,6 @@
 
     <ronda:consumer id="firstConsumer" interface="cn.panda.ronda.spring.service.HelloService" registry="firstRegistry"
                     protocol="json" retries="3" timeout="5" /-->
-    <context:component-scan base-package="cn.panda.ronda.spring" />
+
+    <context:component-scan base-package="cn.panda.ronda" />
 </beans>

@@ -60,7 +60,7 @@ public class RequestMessageTemplate extends AbstractTemplate<RequestMessage> {
 
         packer.writeArrayBegin(argTypes.length);
         for (Class clazz : argTypes) {
-            packer.write(clazz.getCanonicalName());
+            packer.write(clazz.getName());
         }
         packer.writeArrayEnd();
     }

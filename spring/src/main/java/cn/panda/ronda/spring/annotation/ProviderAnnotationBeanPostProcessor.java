@@ -211,9 +211,10 @@ public class ProviderAnnotationBeanPostProcessor implements BeanDefinitionRegist
                                                                String annotatedProviderBeanName) {
         BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(ProviderBean.class)
                 .addConstructorArgValue(provider)
-                // todo 这里需要判断下是否引用reference
+                // todo 这里需要判断下是否引用reference 需要引用
                 // .addPropertyReference("ref", annotatedProviderBeanName)
                 .addPropertyValue("ref", annotatedProviderBeanName)
+                .addPropertyValue("interfaceClass", interfaceClass)
                 .addPropertyValue("interfaceName", interfaceClass.getName());
 
 

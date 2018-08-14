@@ -6,17 +6,17 @@ package cn.panda.ronda.register.enums;
  */
 public enum RegisterTypeEnum {
 
-    ZOOKEEPER(1, "zookeeper注册中心"), REDIS(2, "redis注册中心");
+    ZOOKEEPER("zookeeper", "zookeeper注册中心"), REDIS("redis", "redis注册中心");
 
-    private Integer code;
+    private String code;
     private String desc;
 
-    RegisterTypeEnum(Integer code, String desc) {
+    RegisterTypeEnum(String code, String desc) {
         this.code = code;
         this.desc = desc;
     }
 
-    public Integer getCode() {
+    public String getCode() {
         return code;
     }
 
@@ -24,13 +24,13 @@ public enum RegisterTypeEnum {
         return desc;
     }
 
-    public static RegisterTypeEnum fromCode(Integer code) {
+    public static RegisterTypeEnum fromCode(String code) {
         if (code == null) {
             return null;
         }
 
         for (RegisterTypeEnum enumValue : RegisterTypeEnum.values()) {
-            if (code.equals(enumValue.code)) {
+            if (code.equalsIgnoreCase(enumValue.code)) {
                 return enumValue;
             }
         }

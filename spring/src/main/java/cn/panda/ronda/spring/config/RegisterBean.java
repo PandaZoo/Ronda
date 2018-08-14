@@ -10,7 +10,7 @@ import lombok.Data;
 public class RegisterBean {
 
     private String id;
-    private String protocol;
+    private String type;
     private String address;
     private String port;
 }

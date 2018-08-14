@@ -10,7 +10,7 @@ import cn.panda.ronda.base.remoting.message.RequestMessage;
 import cn.panda.ronda.base.remoting.message.ResponseMessage;
 import cn.panda.ronda.client.codec.MessageDecoder;
 import cn.panda.ronda.client.codec.MessageEncoder;
-import cn.panda.ronda.client.transport.config.TransportConfig;
+import cn.panda.ronda.client.transport.config.ChannelConfig;
 import cn.panda.ronda.client.transport.handler.NettyHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
@@ -23,7 +23,6 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
-import java.net.URL;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
@@ -41,9 +40,9 @@ public class NettyChannel implements Channel {
     private EventLoopGroup bossGroup = new NioEventLoopGroup();
     private io.netty.channel.Channel channel;
     private Boolean isConnected = false;
-    private TransportConfig transportConfig;
+    private ChannelConfig transportConfig;
 
-    public NettyChannel(TransportConfig transportConfig) {
+    public NettyChannel(ChannelConfig transportConfig) {
         this.transportConfig = transportConfig;
     }
 
@@ -53,7 +52,7 @@ public class NettyChannel implements Channel {
     }
 
     @Override
-    public void connect(String url) {
+    public void connect() {
         if (this.isConnected) {
             return;
         }
@@ -84,8 +83,8 @@ public class NettyChannel implements Channel {
     }
 
     @Override
-    public void reconnect(String url) {
-        connect(url);
+    public void reconnect() {
+        connect();
     }
 
     @Override
