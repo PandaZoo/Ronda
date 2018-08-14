@@ -44,8 +44,12 @@ public class ZookeeperComponent implements Watcher {
         }
     }
 
+    /**
+     * session timeout这里指的是client连接失败之后，zookeeper 集群自动重连的时限。
+     * 如果在这个时限之内，failover成功的话连接状态就变成CONNECTED，否则连接状态为变成SESSION_EXPIRED
+     */
     public void connectZookeeper() throws Exception {
-        int SESSION_TIME_OUT = 2000;
+        int SESSION_TIME_OUT = 5000;
         zooKeeper = new ZooKeeper(this.host, SESSION_TIME_OUT, this);
         countDownLatch.await();
         System.out.println("zookeeper connection success");
